@@ -98,8 +98,8 @@ class BuyRentParams:
     selling_cost_frac: float = 0.06
 
     # --- Utility ---
-    ownership_utility: float = 0.5  # per-period bonus for owning
-    gamma: float = 0.95
+    ownership_utility: float = 0.1  # per-period bonus for owning
+    gamma: float = 0.9
 
     # --- Discretization grids ---
     savings_grid: np.ndarray = field(
