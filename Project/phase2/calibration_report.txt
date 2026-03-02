@@ -1,0 +1,31 @@
+======================================================================
+BUY VS. RENT MDP - PARAMETER CALIBRATION REPORT
+======================================================================
+
+Generated: 2026-03-01 16:13:00
+
+DATA SOURCES:
+  - Home Prices: Zillow ZHVI (313 months)
+  - Rent: Zillow ZORI (133 months)
+  - Mortgage Rates: Freddie Mac (1357 weeks)
+
+
+Home Price Dynamics:
+  mu_h (annual drift):        0.0419  (4.19%)
+  sigma_h (annual volatility): 0.0186  (1.86%)
+
+Rent:
+  rent_ratio (monthly):        0.005609  (0.561% of home price)
+
+Mortgage Rates:
+  m_bar (long-run mean):       0.0521  (5.21%)
+  sigma_m (weekly volatility): 0.000962  (0.096%)
+  kappa_m (mean reversion):    0.0100
+
+
+INTERPRETATION:
+  - Home prices have grown at ~4.2% per year historically
+  - Annual volatility of 1.9% means prices can swing ±2% in a typical year
+  - Monthly rent is ~0.56% of home price (~6.7% annually)
+  - Mortgage rates have averaged 5.2% and revert toward this mean
+  - Higher kappa_m = 0.01 means rates adjust quickly to shocks

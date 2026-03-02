@@ -60,7 +60,7 @@ def analyze_policy(
         plt.colorbar(im, ax=axes[idx])
 
     plt.tight_layout()
-    plt.savefig("value_function_heatmap.png", dpi=150, bbox_inches='tight')
+    plt.savefig("Project/phase2/value_function_heatmap.png", dpi=150)
     plt.show()
     print("Saved: value_function_heatmap.png")
 
@@ -125,7 +125,7 @@ def analyze_policy(
         ncol=4, fontsize=10, bbox_to_anchor=(0.5, -0.02)
     )
     plt.tight_layout()
-    plt.savefig("policy_heatmap.png", dpi=150, bbox_inches='tight')
+    plt.savefig("Project/phase2/policy_heatmap.png", dpi=150)
     plt.show()
     print("Saved: policy_heatmap.png")
 

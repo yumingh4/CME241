@@ -13,6 +13,8 @@ Actions:
   - Owning:  {OWN_STAY, SELL}
 
 Total states: 10 * 8 * 5 * 2 = 800
+
+Parameters can be calibrated from real data using calibrate_from_real_data.py
 """
 
 from __future__ import annotations
@@ -32,6 +34,32 @@ from rl.policy import FinitePolicy, FiniteDeterministicPolicy
 
 
 # -----------------------------------------------------------------------
+# Load calibrated parameters if available
+# -----------------------------------------------------------------------
+def load_calibrated_params():
+    """Load calibrated parameters from file if available, else return defaults."""
+    try:
+        import sys
+        import os
+        # Try to load from outputs directory
+        sys.path.insert(0, '/mnt/user-data/outputs')
+        from calibrated_params import CALIBRATED_PARAMS
+        return CALIBRATED_PARAMS
+    except:
+        # Return reasonable defaults (conservative estimates)
+        return {
+            'mu_h': 0.03,      # 3% annual home price appreciation
+            'sigma_h': 0.10,   # 10% annual volatility
+            'rent_ratio': 0.004,  # 0.4% monthly (4.8% annually)
+            'm_bar': 0.06,     # 6% long-run mortgage rate
+            'sigma_m': 0.01,   # 1% mortgage rate volatility
+            'kappa_m': 0.20,   # Mean reversion speed
+        }
+
+CALIB = load_calibrated_params()
+
+
+# -----------------------------------------------------------------------
 # Action enum
 # -----------------------------------------------------------------------
 class Action(Enum):
@@ -46,19 +74,25 @@ class Action(Enum):
 # -----------------------------------------------------------------------
 @dataclass
 class BuyRentParams:
-    """All tunable parameters for the discretized MDP."""
+    """All tunable parameters for the discretized MDP.
+    
+    Default values are loaded from calibrated_params.py if available,
+    otherwise fall back to conservative estimates.
+    """
 
-    # --- Dynamics ---
-    mu_h: float = 0.03          # home price drift (annual)
-    sigma_h: float = 0.10       # home price volatility
-    kappa_m: float = 0.20       # mortgage rate mean-reversion speed
-    m_bar: float = 0.06         # long-run mortgage rate
-    sigma_m: float = 0.01       # mortgage rate volatility
-    rent_ratio: float = 0.05    # rent = rent_ratio * home_price
+    # --- Dynamics (calibrated from real data) ---
+    mu_h: float = CALIB['mu_h']          # home price drift (annual)
+    sigma_h: float = CALIB['sigma_h']    # home price volatility
+    rent_ratio: float = CALIB['rent_ratio']  # rent = rent_ratio * home_price (monthly)
+    m_bar: float = CALIB['m_bar']        # long-run mortgage rate
+    sigma_m: float = CALIB['sigma_m']    # mortgage rate volatility
+    kappa_m: float = CALIB['kappa_m']    # mortgage rate mean-reversion speed
+    
+    # --- Other dynamics ---
     income: float = 5.0         # periodic income (per year)
     risk_free: float = 0.03     # return on savings
 
-    # --- Costs ---
+    # --- Transaction costs (industry standards) ---
     down_payment_frac: float = 0.20
     closing_cost_frac: float = 0.03
     selling_cost_frac: float = 0.06
@@ -228,11 +262,6 @@ def build_buy_rent_mdp(
 
         mapping[state] = action_map
 
-    # FiniteMarkovDecisionProcess expects Mapping[S, Mapping[A, FiniteDistribution]]
-    # but its __init__ wraps states in NonTerminal/Terminal. We need to
-    # pass raw states and let it handle wrapping.
-    # Looking at the source: __init__ takes Mapping[S, Mapping[A, FiniteDistribution[Tuple[S, float]]]]
-    # and wraps keys as NonTerminal, checks if next-states are in keys to decide Terminal vs NonTerminal.
     mdp = FiniteMarkovDecisionProcess(mapping)
     return mdp, params
 
@@ -262,7 +291,6 @@ def print_policy(
                     nt = NonTerminal(state)
                     try:
                         action_dist = policy.act(nt)
-                        # FiniteDeterministicPolicy returns a distribution
                         action = action_dist.sample()
                         print(
                             f"{sg[si]:>10.1f} {pg[pi]:>10.1f} "
