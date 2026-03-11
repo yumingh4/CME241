@@ -168,6 +168,19 @@ class BuyRentEnv(gym.Env):
         
         # Execute action
         next_state, reward = self._transition(self.state, action)
+
+
+        # --- ADD LIQUIDITY PENALTY HERE ---
+        safety_buffer = 15.0  # $15k safety net
+        if next_state.savings < safety_buffer:
+            # Penalize based on how far below the buffer the agent is
+            # Squaring it makes "extreme poverty" much more painful for the agent
+            penalty = 0.1 * (safety_buffer - next_state.savings)**2
+            reward -= penalty
+        # ----------------------------------
+
+        # Update state
+        self.state = next_state
         
         # Update state
         self.state = next_state

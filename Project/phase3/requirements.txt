@@ -11,8 +11,8 @@ seaborn>=0.11.0
 torch>=2.0.0
 torchvision>=0.15.0  # Often required with torch
 
-# Reinforcement Learning
-gymnasium>=0.29.0
+# Reinforcement Learning (using older gym for compatibility)
+gym>=0.26.0
 
 # Jupyter (optional, for running the demo notebook)
 jupyter>=1.0.0
